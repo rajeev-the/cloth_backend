@@ -1,5 +1,6 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const { log } = require('console');
 require('dotenv').config();
 
 const razorpay = new Razorpay({
@@ -7,21 +8,26 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-
 const createRazorpayOrder = async (req, res) => {
-  const { amount } = req.body;
-
   try {
+    let { amount } = req.body;
+    console.log(req.body);
+    
+    // Convert amount to paise and ensure integer
+    amount = Math.round(amount * 100);
+
     const order = await razorpay.orders.create({
-      amount: amount * 100,
+      amount: amount,          // amount in paise, integer
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       payment_capture: 1,
     });
 
+    
     res.json({ orderId: order.id, amount: order.amount });
   } catch (err) {
-    res.status(500).json({ error: "Razorpay order creation failed" });
+    console.error("Razorpay order creation error:", err);
+    res.status(500).json({ error: "Razorpay order creation failed", details: err.message });
   }
 };
 
@@ -43,6 +49,7 @@ const verifyPayment = async (req, res) => {
 };
 
 // ✅ Export both functions
+
 module.exports = {
   createRazorpayOrder,
   verifyPayment,

@@ -66,7 +66,7 @@ app.post('/api/admin/check', (req, res) => {
     return res.status(400).json({ ok: false, message: 'userid and password are required' });
   }
 
-  const ok = userid === process.env.ADMIN_USER ||"admin" && password === process.env.ADMIN_PASS ||"12345";
+  const ok = (userid === (process.env.ADMIN_USER || "admin")) && (password === (process.env.ADMIN_PASS || "12345"));
   return res.status(ok ? 200 : 401).json({ ok });
 });
 
